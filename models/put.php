@@ -140,8 +140,74 @@ class Put
     
         return $this->response;
     }
-    
-   
 
+    //Module:Admin
+    //SubModule:Achievement->Update
+    public function A_updateAchievement($id,$content)
+    {
+        $updateQuery = "UPDATE achievement SET content=? WHERE sno=? ";
+        $updateStmt = mysqli_prepare($this->conn, $updateQuery);
+        mysqli_stmt_bind_param($updateStmt, 'si', $content, $id);
+        $updateResult = mysqli_stmt_execute($updateStmt);
+        if($updateResult)
+        {
+            $this->response = ["message" => "success"];
+        }
+        else
+        {
+            $this->response = ["message" => "not success"];
+        }
+        return $this->response;
+    }    
+    
+    //Module:Admin
+    //SubModule:Course->Update  
+    public function A_updateCourse($adminId, $id, $name, $about, $description)
+    {
+        // Prepare the SQL query with placeholders for parameters
+        $updateInfo = "UPDATE course SET ";
+        $params = array();
+        if (!empty($name)) {
+            $updateInfo .= "name = ?, ";
+            $params[] = $name;
+        }
+        if (!empty($about)) {
+            $updateInfo .= "about = ?, ";
+            $params[] = $about;
+        }
+        if (!empty($description)) {
+            $updateInfo .= "description = ?, ";
+            $params[] = $description;
+        }       
+        $updateInfo = rtrim($updateInfo, ', '); // Remove the trailing comma and space
+        $updateInfo .= " WHERE sno = ? "; // Add the WHERE clause
+        $params[] = $id; // Add the ID parameter
+        
+        $updateStmt = mysqli_prepare($this->conn, $updateInfo);
+    
+        if ($updateStmt) {
+            // Bind parameters to the placeholders
+            $types = str_repeat('s', count($params)); // Assuming all parameters are strings
+            mysqli_stmt_bind_param($updateStmt, $types, ...$params);
+    
+            // Execute the statement
+            $updateResult = mysqli_stmt_execute($updateStmt);
+    
+            if ($updateResult) {
+                $this->response = ["message" => "Updated"];
+            } else {
+                $this->response = ["message" => "Error executing update query: " . mysqli_stmt_error($updateStmt)];
+            }
+    
+            // Close the statement
+            mysqli_stmt_close($updateStmt);
+        } else {
+            // Handle query preparation error
+            $this->response = ["message" => "Error preparing update query: " . mysqli_error($this->conn)];
+        }
+    
+        return $this->response;
+    }
+    
 }
 ?>

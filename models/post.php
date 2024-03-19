@@ -113,6 +113,46 @@ class Post
     }
     
 
+    // Module: Admin
+    // SubModule: Achievement->Insert
+    public function A_InsertAchievement($adminId, $content)
+    {         
+        $insert = "INSERT INTO achievement (admin_id, content) VALUES (?, ?)";
+        $stmt = $this->conn->prepare($insert);
+    
+        if (!$stmt) {
+            return ["message" => "Query preparation error: " . $this->conn->error];
+        }
+    
+        $stmt->bind_param("ss", $adminId, $content);
+        $result = $stmt->execute();
+    
+        if ($result) {
+            return ["message" => "Achievement insertion successful"];
+        } else {
+            return ["message" => "Achievement insertion failed: " . $stmt->error];
+        }
+    }
+    // Module: Admin
+    // SubModule: Course->Insert
+    public function A_InsertCourse($adminId, $name, $about, $description)
+    {         
+        $insert = "INSERT INTO achievement (admin_id, name, about, description) VALUES (?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($insert);
+    
+        if (!$stmt) {
+            return ["message" => "Query preparation error: " . $this->conn->error];
+        }
+    
+        $stmt->bind_param("ss", $adminId, $name, $about, $description);
+        $result = $stmt->execute();
+    
+        if ($result) {
+            return ["message" => "Course insertion successful"];
+        } else {
+            return ["message" => "Course insertion failed: " . $stmt->error];
+        }
+    }
 
 }
 ?>
