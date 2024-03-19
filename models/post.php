@@ -85,6 +85,27 @@ class Post
         }
     }
 
+    // Module: Admin
+    // SubModule: Notification -> Single Notification
+    public function A_singleNotify($adminId, $title, $content)
+    {     
+        $insert = "INSERT INTO notification (admin_id, title, content) VALUES (?, ?, ?)";
+        $stmt = $this->conn->prepare($insert);
+
+        if (!$stmt) {
+            return ["message" => "Query preparation error: " . $this->conn->error];
+        }
+
+        $stmt->bind_param("sss", $adminId, $title, $content);
+        $result = $stmt->execute();
+
+        if ($result) {
+            return ["message" => "Notification insertion successful"];
+        } else {
+            return ["message" => "Notification insertion failed: " . $stmt->error];
+        }
+    }
+
 
 }
 ?>
