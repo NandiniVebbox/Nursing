@@ -28,12 +28,16 @@ class Put
             $userIdWithoutDomain = substr($gmail, 0, strpos($gmail, '@'));
             $subject = "Your One-Time Password (OTP) for Super Admin Login";
             
-            // Calculate the expiration time (e.g., 2 minutes from now)
-            
-            $expirationTime = date('Y-m-d H:i:s', strtotime('+1 minute 30 seconds'));
+            // Create a DateTime object for the current time in the Asia/Kolkata timezone
+            $timezone = new DateTimeZone('Asia/Kolkata');
+            $datetime = new DateTime('now', $timezone);
+
+            // Calculate the expiration time (1 minute and 30 seconds from now) and format it
+            $expirationTime = $datetime->modify('+1 minute 30 seconds')->format('Y-m-d H:i:s');
+
             $headers = "MIME-Version: 1.0" . "\r\n";
             $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";                                            
-            $headers .= 'From: <Base2Geeks>' . "\r\n";
+            $headers .= 'From: <Nursing>' . "\r\n";
             $message = "
             <p style='color: black;'>Dear $userIdWithoutDomain,</p>
             <p style='color: black;'>Thank you for initiating the OTP verification process for accessing the  Admin panel. To proceed further, please find your OTP below:</p>

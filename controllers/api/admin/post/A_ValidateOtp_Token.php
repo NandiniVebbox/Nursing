@@ -23,10 +23,10 @@ function handleResponse($statusCode, $message) {
 }
 
 // Check if required data is provided
-if (empty($data->gmail_id) && empty($data->otp)) {
+if (empty($data->gmailId) && empty($data->otp)) {
     handleResponse(400, 'invalid data. both gmail_id and otp are required.');
 }
-if (empty($data->gmail_id)) {
+if (empty($data->gmailId)) {
     handleResponse(400, 'invalid data.gmail_id is required.');
 }
 if(empty($data->otp))
@@ -37,12 +37,12 @@ if (empty($data->otp) || !preg_match('/^\d{4}$/', $data->otp)) {
     handleResponse(400, 'invalid OTP. please provide a four-digit number for OTP.');
 }
 // Check if the Gmail ID is a valid email address and contains "@gmail.com"
-if (!filter_var($data->gmail_id, FILTER_VALIDATE_EMAIL) || !preg_match('/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $data->gmail_id)) {
+if (!filter_var($data->gmailId, FILTER_VALIDATE_EMAIL) || !preg_match('/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $data->gmailId)) {
     handleResponse(400, 'invalid gmail id format. it should be a valid email address and contain "@gmail.com".');
 }
 
 $obj = new Post();
-$result = $obj->A_ValidateOtp_Token($data->gmail_id, $data->otp);
+$result = $obj->A_ValidateOtp_Token($data->gmailId, $data->otp);
 
 // Handle errors
 if ($result === false) {
