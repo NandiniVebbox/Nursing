@@ -23,7 +23,7 @@ function handleResponse($statusCode, $message) {
 
 // Decode incoming JSON data
 $data = json_decode(file_get_contents('php://input'));
-$gmail=$data->gmail_id;
+$gmail=$data->gmailId;
 // Remove spaces from the Gmail ID
 $cleanedGmail = str_replace(' ', '', $gmail);
 // Check if required data is provided

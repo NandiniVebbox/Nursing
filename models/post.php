@@ -54,8 +54,9 @@ class Post
         $stmtOtp->store_result();
         if ($stmtOtp->num_rows > 0) {
             // OTP is valid, insert token
-            $insertResult = $this->insertToken($gmail);
-            return $insertResult;
+            // $insertResult = $this->insertToken($gmail);
+            // return $insertResult;
+            return ["message" => "Success"];
         } else {
             return ["message" => "Invalid OTP"];
         }
@@ -89,22 +90,28 @@ class Post
     // SubModule: Notification -> Single Notification
     public function A_singleNotify($adminId, $title, $content)
     {     
-        $insert = "INSERT INTO notification (admin_id, title, content) VALUES (?, ?, ?)";
+        // Set the timezone to Asia/Kolkata
+        $timezone = new DateTimeZone('Asia/Kolkata');
+        $datetime = new DateTime('now', $timezone);
+        $created_at = $datetime->format('Y-m-d H:i:s');
+    
+        $insert = "INSERT INTO notification (admin_id, title, content, created_at) VALUES (?, ?, ?, ?)";
         $stmt = $this->conn->prepare($insert);
-
+    
         if (!$stmt) {
             return ["message" => "Query preparation error: " . $this->conn->error];
         }
-
-        $stmt->bind_param("sss", $adminId, $title, $content);
+    
+        $stmt->bind_param("ssss", $adminId, $title, $content, $created_at);
         $result = $stmt->execute();
-
+    
         if ($result) {
             return ["message" => "Notification insertion successful"];
         } else {
             return ["message" => "Notification insertion failed: " . $stmt->error];
         }
     }
+    
 
 
 }
