@@ -18,41 +18,43 @@ class Post
     {
         // Check if email exists
         $queryEmail = "SELECT * FROM admin WHERE gmail = ?";
-        $stmtEmail = $this->conn->prepare($queryEmail);
+        $stmtEmail = mysqli_prepare($this->conn, $queryEmail);
 
         if (!$stmtEmail) {
-            return ["message" => "Query preparation error: " . $this->conn->error];
+            return ["message" => "Query preparation error: " . mysqli_error($this->conn)];
         }
 
-        $stmtEmail->bind_param("s", $gmail);
-        $stmtEmail->execute();
+        mysqli_stmt_bind_param($stmtEmail, "s", $gmail);
+        mysqli_stmt_execute($stmtEmail);
 
-        if ($stmtEmail->error) {
-            return ["message" => "Query execution error: " . $stmtEmail->error];
+        $resultEmail = mysqli_stmt_get_result($stmtEmail);
+
+        if (!$resultEmail) {
+            return ["message" => "Query execution error: " . mysqli_error($this->conn)];
         }
 
-        $stmtEmail->store_result();
-        if ($stmtEmail->num_rows === 0) {
+        if (mysqli_num_rows($resultEmail) === 0) {
             return ["message" => "Email not found"];
         }
 
         // Check OTP
         $queryOtp = "SELECT * FROM admin WHERE gmail = ? AND otp = ? AND expiration_time > NOW()";
-        $stmtOtp = $this->conn->prepare($queryOtp);
+        $stmtOtp = mysqli_prepare($this->conn, $queryOtp);
 
         if (!$stmtOtp) {
-            return ["message" => "Query preparation error: " . $this->conn->error];
+            return ["message" => "Query preparation error: " . mysqli_error($this->conn)];
         }
 
-        $stmtOtp->bind_param("ss", $gmail, $otp);
-        $stmtOtp->execute();
+        mysqli_stmt_bind_param($stmtOtp, "ss", $gmail, $otp);
+        mysqli_stmt_execute($stmtOtp);
 
-        if ($stmtOtp->error) {
-            return ["message" => "Query execution error: " . $stmtOtp->error];
+        $resultOtp = mysqli_stmt_get_result($stmtOtp);
+
+        if (!$resultOtp) {
+            return ["message" => "Query execution error: " . mysqli_error($this->conn)];
         }
 
-        $stmtOtp->store_result();
-        if ($stmtOtp->num_rows > 0) {
+        if (mysqli_num_rows($resultOtp) > 0) {
             // OTP is valid, insert token
             // $insertResult = $this->insertToken($gmail);
             // return $insertResult;
@@ -70,19 +72,19 @@ class Post
         $expirationTime = date('Y-m-d H:i:s', strtotime('+1 day'));
 
         $insert = "INSERT INTO admin_token (gmail, token, expiration_time) VALUES (?, ?, ?)";
-        $stmt = $this->conn->prepare($insert);
+        $stmt = mysqli_prepare($this->conn, $insert);
 
         if (!$stmt) {
-            return ["message" => "Query preparation error: " . $this->conn->error];
+            return ["message" => "Query preparation error: " . mysqli_error($this->conn)];
         }
 
-        $stmt->bind_param("sss", $gmail, $token, $expirationTime);
-        $result = $stmt->execute();
+        mysqli_stmt_bind_param($stmt, "sss", $gmail, $token, $expirationTime);
+        $result = mysqli_stmt_execute($stmt);
 
         if ($result) {
             return ["message" => "Token insertion successful", "token" => $token];
         } else {
-            return ["message" => "Token insertion failed: " . $stmt->error];
+            return ["message" => "Token insertion failed: " . mysqli_error($this->conn)];
         }
     }
     
@@ -96,19 +98,19 @@ class Post
         $created_at = $datetime->format('Y-m-d H:i:s');
     
         $insert = "INSERT INTO notification (admin_id, title, content, created_at) VALUES (?, ?, ?, ?)";
-        $stmt = $this->conn->prepare($insert);
+        $stmt = mysqli_prepare($this->conn, $insert);
     
         if (!$stmt) {
-            return ["message" => "Query preparation error: " . $this->conn->error];
+            return ["message" => "Query preparation error: " . mysqli_error($this->conn)];
         }
     
-        $stmt->bind_param("ssss", $adminId, $title, $content, $created_at);
-        $result = $stmt->execute();
+        mysqli_stmt_bind_param($stmt, "ssss", $adminId, $title, $content, $created_at);
+        $result = mysqli_stmt_execute($stmt);
     
         if ($result) {
             return ["message" => "Notification insertion successful"];
         } else {
-            return ["message" => "Notification insertion failed: " . $stmt->error];
+            return ["message" => "Notification insertion failed: " . mysqli_error($this->conn)];
         }
     }
     
@@ -117,19 +119,19 @@ class Post
     public function A_InsertAchievement($adminId, $content)
     {         
         $insert = "INSERT INTO achievement (admin_id, content) VALUES (?, ?)";
-        $stmt = $this->conn->prepare($insert);
+        $stmt = mysqli_prepare($this->conn, $insert);
     
         if (!$stmt) {
-            return ["message" => "Query preparation error: " . $this->conn->error];
+            return ["message" => "Query preparation error: " . mysqli_error($this->conn)];
         }
     
-        $stmt->bind_param("ss", $adminId, $content);
-        $result = $stmt->execute();
+        mysqli_stmt_bind_param($stmt, "ss", $adminId, $content);
+        $result = mysqli_stmt_execute($stmt);
     
         if ($result) {
             return ["message" => "Achievement insertion successful"];
         } else {
-            return ["message" => "Achievement insertion failed: " . $stmt->error];
+            return ["message" => "Achievement insertion failed: " . mysqli_error($this->conn)];
         }
     }
     
@@ -138,21 +140,21 @@ class Post
     public function A_InsertCourse($adminId, $name, $about, $description)
     {         
         $insert = "INSERT INTO course (admin_id, course_name, course_about, course_description) VALUES (?, ?, ?, ?)";
-        $stmt = $this->conn->prepare($insert);
+        $stmt = mysqli_prepare($this->conn, $insert);
     
         if (!$stmt) {
-            return ["message" => "Query preparation error: " . $this->conn->error];
+            return ["message" => "Query preparation error: " . mysqli_error($this->conn)];
         }
     
-        $stmt->bind_param("ssss", $adminId, $name, $about, $description);
-        $result = $stmt->execute();
+        mysqli_stmt_bind_param($stmt, "ssss", $adminId, $name, $about, $description);
+        $result = mysqli_stmt_execute($stmt);
     
         if ($result) {
             return ["message" => "Course insertion successful"];
         } else {
-            return ["message" => "Course insertion failed: " . $stmt->error];
+            return ["message" => "Course insertion failed: " . mysqli_error($this->conn)];
         }
     }
 
 }
-?>
+?> 
