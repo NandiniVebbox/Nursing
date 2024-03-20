@@ -91,5 +91,32 @@ class Get
           
     }
 
+    //Module:Admin
+    //SubModule:Static Info->View
+    public function A_viewStaticInfo($adminId)
+    {        
+        $selectData = "SELECT * FROM static_info";
+        $stmt = mysqli_prepare($this->conn, $selectData);        
+        mysqli_stmt_execute($stmt);       
+        if (mysqli_stmt_errno($stmt)) {       
+        return false;
+        }
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result === false) {            
+            return false;
+        }   
+
+        if (mysqli_num_rows($result) > 0) {
+        $staticInfo = mysqli_fetch_all($result, MYSQLI_ASSOC);        
+        mysqli_free_result($result);
+        mysqli_stmt_close($stmt);
+        return $staticInfo;
+        } else {
+        return ["error"=>"No Details Found"]; 
+        }
+          
+    }
+
+
 }
 ?>
