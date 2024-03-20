@@ -156,5 +156,137 @@ class Post
         }
     }
 
+    //Module:Admin
+    //SubModule: PMCQ -> Add institution
+    public function A_InsertPmcqInstitution($adminId,$name,$desc,$instruction)
+    {
+        $insert = "INSERT INTO pmcq (institution_name, institution_desc, institution_instruction) VALUES (?, ?, ?)";
+        $stmt = mysqli_prepare($this->conn, $insert);
+    
+        if (!$stmt) {
+            return ["message" => "Query preparation error: " . mysqli_error($this->conn)];
+        }
+    
+        mysqli_stmt_bind_param($stmt, "sss", $name,$desc,$instruction);
+        $result = mysqli_stmt_execute($stmt);
+    
+        if ($result) {
+            return ["message" => "Institution Added successful"];
+        } else {
+            return ["message" => "Institution Added failed: " . mysqli_error($this->conn)];
+        }
+    }
+    public function A_InsertPmcqQuestion($adminId,$institutionId,$year,$month,$questions)
+    {
+        //check already inserted or not
+        if(!$this->A_check_pmcq_YearMonth($institutionId,$year,$month))
+        {
+            $insert = "INSERT INTO pmcq_meta (institution_id, year, month) VALUES (?, ?, ?)";
+            $stmt = mysqli_prepare($this->conn, $insert);
+        
+            if (!$stmt) {
+                return ["message" => "Query preparation error: " . mysqli_error($this->conn)];
+            }
+        
+            mysqli_stmt_bind_param($stmt, "sss", $institutionId,$year,$month);
+            $result = mysqli_stmt_execute($stmt);
+        
+            if ($result) {
+                //fetch paperid from pmcq_meta
+                $paperId=$this->A_fetchPaperId_pmcq_meta($institutionId,$year,$month);
+                //add question to pmcq_question
+                $getStatusQueandAnsTable=$this->A_addQuestion($questions,$institutionId,$paperId);
+                if($getStatusQueandAnsTable=='success')
+                {                
+                    return ["message" => "Questions Added successful"];
+                }else
+                {
+                    return ["message" => "Questions Added failed: " . mysqli_error($this->conn)];
+                }
+            } else {
+                return ["message" => "Questions Added failed: " . mysqli_error($this->conn)];
+            }
+        }
+        else
+        {
+            return ["message" => "Already added"];
+        }
+       
+    }
+    public function A_addQuestion($questions, $institutionid, $paperId)
+    {
+        // Check if $questions is an array
+        if (!is_array($questions)) {
+            return ["message" => "Questions should be an array"];
+        }
+        
+        foreach ($questions as $question) {
+            $questionText = $question->questionText; // Accessing object property
+            $option1 = $question->option1; // Accessing object property
+            $option2 = $question->option2; // Accessing object property
+            $option3 = $question->option3; // Accessing object property
+            $option4 = $question->option4; // Accessing object property
+            $answer = $question->answer; // Accessing object property
+            
+            // Prepare and execute the SQL query
+            $insert = "INSERT INTO pmcq_question (institution_id, paper_id, questions, option1, option2, option3, option4, answer) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $stmt = mysqli_prepare($this->conn, $insert);
+    
+            if (!$stmt) {
+                return ["message" => "Query preparation error: " . mysqli_error($this->conn)];
+            }
+    
+            mysqli_stmt_bind_param($stmt, "iissssss", $institutionid, $paperId, $questionText, $option1, $option2, $option3, $option4, $answer);
+            $result = mysqli_stmt_execute($stmt);
+    
+            if (!$result) {
+                return ["message" => "Question insertion failed: " . mysqli_error($this->conn)];
+            }
+        }
+        $this->response = "success";
+        return $this->response;
+    }
+    
+
+    public function A_fetchPaperId_pmcq_meta($institutionId,$year,$month)
+    { 
+        $query = "SELECT sno FROM pmcq_meta WHERE institution_id=? AND year=? AND month=?";
+        $stmt = mysqli_prepare($this->conn, $query);
+        mysqli_stmt_bind_param($stmt, "iss", $institutionId,$year,$month);
+        mysqli_stmt_execute($stmt);
+        if (mysqli_stmt_errno($stmt)) {
+            return false;
+        }
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result === false) {
+            return false;
+        }
+        $count = mysqli_fetch_assoc($result)['sno'];
+        mysqli_free_result($result);
+        mysqli_stmt_close($stmt);        
+        return $count;
+
+    }
+    public function A_check_pmcq_YearMonth($institutionId,$year,$month)
+    {
+        $query = "SELECT COUNT(sno) AS count FROM pmcq_meta WHERE institution_id=? AND year=? AND month=?";
+        $stmt = mysqli_prepare($this->conn, $query);
+        mysqli_stmt_bind_param($stmt, "iss", $institutionId,$year,$month);
+        mysqli_stmt_execute($stmt);
+        if (mysqli_stmt_errno($stmt)) {
+            return false;
+        }
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result === false) {
+            return false;
+        }
+        $count = mysqli_fetch_assoc($result)['count'];
+        mysqli_free_result($result);
+        mysqli_stmt_close($stmt);
+        // Return 1 if the Gmail address exists, otherwise return 0        
+        return $count;
+        
+    }
+    
 }
 ?> 
