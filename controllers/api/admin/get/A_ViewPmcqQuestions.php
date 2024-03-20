@@ -1,22 +1,23 @@
 <?php
 
-$modelsPath= '../../../../models/get.php';
-$headersPath= '../../../../config/header.php';
+// Define paths to required files
+$modelsPath = '../../../../models/get.php';
+$headersPath = '../../../../config/header.php';
 
-if (file_exists($modelsPath) && file_exists($headersPath)) {
-    require_once $modelsPath;
-    require_once $headersPath;
-} else {
-    // Handle the case where one or both files are missing
-    http_response_code(500);
-    echo json_encode(['error' => 'Required files are missing']);
-    exit();
+// Check if required files exist and include them
+if (!file_exists($modelsPath) || !file_exists($headersPath)) {
+    respondWithError(500, 'Required files are missing');
 }
 
+// Require the necessary files
+require_once $modelsPath;
+require_once $headersPath;
+
+// Decode the incoming JSON data
 $data = json_decode(file_get_contents('php://input'));
 
 // Function to handle errors and send response
-function handleResponse($statusCode, $message) {
+function respondWithError($statusCode, $message) {
     http_response_code($statusCode);
     echo json_encode(['error' => $message]);
     exit();
@@ -24,29 +25,32 @@ function handleResponse($statusCode, $message) {
 
 // Check if required data is provided
 if (empty($data->adminId)) {
-    handleResponse(400, 'invalid data. gmail_id is required.');
+    respondWithError(400, 'Invalid data. Gmail ID is required.');
 }
 if (empty($data->institutionId)) {
-    handleResponse(400, 'invalid data. institutionId is required.');
+    respondWithError(400, 'Invalid data. Institution ID is required.');
 }
 if (empty($data->paperId)) {
-    handleResponse(400, 'invalid data. institutionId is required.');
+    respondWithError(400, 'Invalid data. Paper ID is required.');
 }
 if (empty($data->questionId)) {
-    handleResponse(400, 'invalid data. institutionId is required.');
+    respondWithError(400, 'Invalid data. Question ID is required.');
 }
 
-// Check if the Gmail ID is a valid email address and contains "@gmail.com"
-if (!filter_var($data->adminId, FILTER_VALIDATE_EMAIL) || !strpos($data->adminId, '@gmail.com')) {
-    handleResponse(400, 'invalid gmail id format. it should be a valid email address and contain "@gmail.com".');
+// Validate Gmail ID format
+if (!filter_var($data->adminId, FILTER_VALIDATE_EMAIL) || strpos($data->adminId, '@gmail.com') === false) {
+    respondWithError(400, 'Invalid Gmail ID format. It should be a valid email address and contain "@gmail.com".');
 }
 
+// Create an instance of the Get class
 $obj = new Get();
-$result = $obj->A_viewPmcqQuestions($data->adminId,$data->institutionId,$data->paperId,$data->questionId);
+
+// Retrieve PMCQ questions based on admin ID, institution ID, paper ID, and question ID
+$result = $obj->A_viewPmcqQuestions($data->adminId, $data->institutionId, $data->paperId, $data->questionId);
 
 // Handle errors
 if ($result === false) {
-    handleResponse(500, 'internal server error');
+    respondWithError(500, 'Internal server error');
 }
 
 // Send the result

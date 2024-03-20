@@ -1,43 +1,42 @@
 <?php
 
-$modelsPath= '../../../../models/get.php';
-$headersPath= '../../../../config/header.php';
+// Define paths to required files
+$modelsPath = '../../../../models/get.php';
+$headersPath = '../../../../config/header.php';
 
-if (file_exists($modelsPath) && file_exists($headersPath)) {
-    require_once $modelsPath;
-    require_once $headersPath;
-} else {
-    // Handle the case where one or both files are missing
-    http_response_code(500);
-    echo json_encode(['error' => 'Required files are missing']);
-    exit();
+// Check if required files exist and include them
+if (!file_exists($modelsPath) || !file_exists($headersPath)) {
+    respondWithError(500, 'Required files are missing');
 }
 
+// Require the necessary files
+require_once $modelsPath;
+require_once $headersPath;
+
+// Decode JSON input data
 $data = json_decode(file_get_contents('php://input'));
 
 // Function to handle errors and send response
-function handleResponse($statusCode, $message) {
+function respondWithError($statusCode, $message) {
     http_response_code($statusCode);
     echo json_encode(['error' => $message]);
     exit();
 }
 
-// Check if required data is provided
-if (empty($data->adminId)) {
-    handleResponse(400, 'invalid data. gmail_id is required.');
+// Validate admin ID presence and format
+if (empty($data->adminId) || !filter_var($data->adminId, FILTER_VALIDATE_EMAIL)) {
+    respondWithError(400, 'Invalid data. Gmail ID is required and should be a valid email address.');
 }
 
-// Check if the Gmail ID is a valid email address and contains "@gmail.com"
-if (!filter_var($data->adminId, FILTER_VALIDATE_EMAIL) || !strpos($data->adminId, '@gmail.com')) {
-    handleResponse(400, 'invalid gmail id format. it should be a valid email address and contain "@gmail.com".');
-}
-
+// Create an instance of the Get class
 $obj = new Get();
+
+// Retrieve course names based on admin ID
 $result = $obj->A_viewCourseName($data->adminId);
 
 // Handle errors
 if ($result === false) {
-    handleResponse(500, 'internal server error');
+    respondWithError(500, 'Internal server error');
 }
 
 // Send the result

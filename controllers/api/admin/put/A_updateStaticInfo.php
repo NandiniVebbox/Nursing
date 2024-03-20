@@ -1,16 +1,15 @@
 <?php
 
-// Include necessary files with error handling
+// Define file paths
 $modelsPath = '../../../../models/put.php';
 $headersPath = '../../../../config/header.php';
 
+// Check if required files exist
 if (!file_exists($modelsPath) || !file_exists($headersPath)) {
-    // Handle the case where one or both files are missing
-    http_response_code(500);
-    echo json_encode(['error' => 'Required files are missing']);
-    exit();
+    handleResponse(500, 'Required files are missing');
 }
 
+// Include necessary files
 require_once $modelsPath;
 require_once $headersPath;
 
@@ -23,10 +22,22 @@ function handleResponse($statusCode, $message) {
 
 // Decode incoming JSON data
 $data = json_decode(file_get_contents('php://input'));
+
+// Check if required fields are provided
+if (!isset($data->mobNo) || !isset($data->address) || !isset($data->whatsappLink) || !isset($data->gmailLink)) {
+    handleResponse(400, 'Required fields are missing');
+}
+
+// Extract data from JSON
 $mobNo = $data->mobNo;
 $address = $data->address;
 $whatsappLink = $data->whatsappLink;
 $gmailLink = $data->gmailLink;
+
+// Validate mobile number
+if (!is_numeric($mobNo)) {
+    handleResponse(400, 'Invalid mobile number');
+}
 
 // Create an instance of the Put class
 $obj = new Put();
@@ -41,4 +52,5 @@ if ($result === false) {
 
 // Send the result
 echo json_encode($result);
+
 ?>
