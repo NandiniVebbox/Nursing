@@ -117,6 +117,113 @@ class Get
           
     }
 
+    //Module:Admin
+    //SubModule:PMCQ ->View Institution
+    public function A_viewPmcqInstitution($adminId)
+    {        
+        $selectData = "SELECT * FROM pmcq";
+        $stmt = mysqli_prepare($this->conn, $selectData);        
+        mysqli_stmt_execute($stmt);       
+        if (mysqli_stmt_errno($stmt)) {       
+        return false;
+        }
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result === false) {            
+            return false;
+        }   
+
+        if (mysqli_num_rows($result) > 0) {
+        $institutionInfo = mysqli_fetch_all($result, MYSQLI_ASSOC);        
+        mysqli_free_result($result);
+        mysqli_stmt_close($stmt);
+        return $institutionInfo;
+        } else {
+        return ["error"=>"No Details Found"]; 
+        }
+          
+    }
+
+    //Module:Admin
+    //SubModule:PMCQ ->View Paper
+    public function A_viewPmcqPaper($adminId,$id)
+    {        
+        $selectData = "SELECT * FROM pmcq_meta WHERE institution_id=?";
+        $stmt = mysqli_prepare($this->conn, $selectData);   
+        mysqli_stmt_bind_param($stmt, 'i', $id);          
+        mysqli_stmt_execute($stmt);       
+        if (mysqli_stmt_errno($stmt)) {       
+        return false;
+        }
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result === false) {            
+            return false;
+        }   
+
+        if (mysqli_num_rows($result) > 0) {
+        $paperInfo = mysqli_fetch_all($result, MYSQLI_ASSOC);        
+        mysqli_free_result($result);
+        mysqli_stmt_close($stmt);
+        return $paperInfo;
+        } else {
+        return ["error"=>"No Details Found"]; 
+        }
+          
+    }
+
+    //Module:Admin
+    //SubModule:PMCQ ->View Question Count
+    public function A_viewPmcqQuestionCount($adminId,$institutionId,$paperId)
+    {        
+        
+        $selectData = "SELECT sno FROM pmcq_question WHERE institution_id=? and paper_id=?";
+        $stmt = mysqli_prepare($this->conn, $selectData);        
+        mysqli_stmt_bind_param($stmt, 'ii', $institutionId,$paperId);          
+        mysqli_stmt_execute($stmt);       
+        
+        if (mysqli_stmt_errno($stmt)) {       
+        return false;
+        }
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result === false) {            
+            return false;
+        }   
+
+        if (mysqli_num_rows($result) > 0) {
+        $qustionCount = mysqli_fetch_all($result, MYSQLI_ASSOC);        
+        mysqli_free_result($result);
+        mysqli_stmt_close($stmt);
+        return $qustionCount;
+        } else {
+        return ["error"=>"No Details Found"]; 
+        }          
+    }
+
+    //Module:Admin
+    //SubModule:PMCQ ->View Question 
+    public function A_viewPmcqQuestions($adminId,$institutionId,$paperId,$questionId)
+    {        
+        $selectData = "SELECT * FROM pmcq_question WHERE institution_id=? and paper_id=? and sno=?";
+        $stmt = mysqli_prepare($this->conn, $selectData);  
+        mysqli_stmt_bind_param($stmt, 'iii', $institutionId,$paperId,$questionId);           
+        mysqli_stmt_execute($stmt);       
+        if (mysqli_stmt_errno($stmt)) {       
+        return false;
+        }
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result === false) {            
+            return false;
+        }   
+
+        if (mysqli_num_rows($result) > 0) {
+        $paperInfo = mysqli_fetch_all($result, MYSQLI_ASSOC);        
+        mysqli_free_result($result);
+        mysqli_stmt_close($stmt);
+        return $paperInfo;
+        } else {
+        return ["error"=>"No Details Found"]; 
+        }          
+    }
+
 
 }
 ?>
