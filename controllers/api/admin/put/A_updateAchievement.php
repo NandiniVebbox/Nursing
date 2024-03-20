@@ -29,7 +29,7 @@ $data = json_decode(file_get_contents('php://input'));
 $obj = new Put();
 
 // Call the A_updateStaticInfo method
-$result = $obj->A_updateAchievement($data->id, $data->content);
+$result = $obj->A_updateAchievement($data->adminId,$data->id,$data->content);
 
 // Handle errors
 if ($result === false) {

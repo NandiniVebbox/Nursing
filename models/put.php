@@ -143,7 +143,7 @@ class Put
 
     //Module:Admin
     //SubModule:Achievement->Update
-    public function A_updateAchievement($id,$content)
+    public function A_updateAchievement($adminId,$id,$content)
     {
         $updateQuery = "UPDATE achievement SET content=? WHERE sno=? ";
         $updateStmt = mysqli_prepare($this->conn, $updateQuery);

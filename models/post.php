@@ -85,7 +85,7 @@ class Post
             return ["message" => "Token insertion failed: " . $stmt->error];
         }
     }
-
+    
     // Module: Admin
     // SubModule: Notification -> Single Notification
     public function A_singleNotify($adminId, $title, $content)
@@ -112,7 +112,6 @@ class Post
         }
     }
     
-
     // Module: Admin
     // SubModule: Achievement->Insert
     public function A_InsertAchievement($adminId, $content)
@@ -133,6 +132,7 @@ class Post
             return ["message" => "Achievement insertion failed: " . $stmt->error];
         }
     }
+    
     // Module: Admin
     // SubModule: Course->Insert
     public function A_InsertCourse($adminId, $name, $about, $description)
