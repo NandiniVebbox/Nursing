@@ -149,15 +149,20 @@ class Put
         $updateStmt = mysqli_prepare($this->conn, $updateQuery);
         mysqli_stmt_bind_param($updateStmt, 'si', $content, $id);
         $updateResult = mysqli_stmt_execute($updateStmt);
-        if($updateResult)
-        {
-            $this->response = ["message" => "success"];
+        
+        if ($updateResult) {
+            // Check if any rows were affected
+            if (mysqli_stmt_affected_rows($updateStmt) > 0) {
+                $this->response = ["message" => "success"];
+            } else {
+                $this->response = ["message" => "No rows were affected. Sno does not exist."];
+            }
+        } else {
+            $this->response = ["message" => "Update execution failed: " . mysqli_error($this->conn)];
         }
-        else
-        {
-            $this->response = ["message" => "not success"];
-        }
+        
         return $this->response;
+        
     }    
     
     //Module:Admin
@@ -168,17 +173,18 @@ class Put
         $updateInfo = "UPDATE course SET ";
         $params = array();
         if (!empty($name)) {
-            $updateInfo .= "name = ?, ";
+            $updateInfo .= "course_name = ?, ";
             $params[] = $name;
         }
         if (!empty($about)) {
-            $updateInfo .= "about = ?, ";
+            $updateInfo .= "course_about = ?, ";
             $params[] = $about;
         }
         if (!empty($description)) {
-            $updateInfo .= "description = ?, ";
+            $updateInfo .= "course_description = ?, ";
             $params[] = $description;
         }       
+        
         $updateInfo = rtrim($updateInfo, ', '); // Remove the trailing comma and space
         $updateInfo .= " WHERE sno = ? "; // Add the WHERE clause
         $params[] = $id; // Add the ID parameter
@@ -186,11 +192,9 @@ class Put
         $updateStmt = mysqli_prepare($this->conn, $updateInfo);
     
         if ($updateStmt) {
-            // Bind parameters to the placeholders
-            $types = str_repeat('s', count($params)); // Assuming all parameters are strings
+            $types = str_repeat('s', count($params) - 1) . 'i'; // Assuming all parameters except the last one are strings and the last one is an integer            
             mysqli_stmt_bind_param($updateStmt, $types, ...$params);
-    
-            // Execute the statement
+            
             $updateResult = mysqli_stmt_execute($updateStmt);
     
             if ($updateResult) {

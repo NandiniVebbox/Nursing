@@ -137,14 +137,14 @@ class Post
     // SubModule: Course->Insert
     public function A_InsertCourse($adminId, $name, $about, $description)
     {         
-        $insert = "INSERT INTO achievement (admin_id, name, about, description) VALUES (?, ?, ?, ?)";
+        $insert = "INSERT INTO course (admin_id, course_name, course_about, course_description) VALUES (?, ?, ?, ?)";
         $stmt = $this->conn->prepare($insert);
     
         if (!$stmt) {
             return ["message" => "Query preparation error: " . $this->conn->error];
         }
     
-        $stmt->bind_param("ss", $adminId, $name, $about, $description);
+        $stmt->bind_param("ssss", $adminId, $name, $about, $description);
         $result = $stmt->execute();
     
         if ($result) {
