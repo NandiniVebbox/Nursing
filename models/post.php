@@ -424,7 +424,141 @@ class Post
         return $count;
         
     }
+
+    //Module:Admin
+    //SubModule: Non Nursing -> Add Category
+    public function A_InsertNonNurisngCategory($adminId,$name,$desc,$instruction)
+    {
+        $insert = "INSERT INTO non_nursing (category_name, category_desc, category_instruction) VALUES (?, ?, ?)";
+        $stmt = mysqli_prepare($this->conn, $insert);
+    
+        if (!$stmt) {
+            return ["message" => "Query preparation error: " . mysqli_error($this->conn)];
+        }
+    
+        mysqli_stmt_bind_param($stmt, "sss", $name,$desc,$instruction);
+        $result = mysqli_stmt_execute($stmt);
+    
+        if ($result) {
+            return ["message" => "Category Added successful"];
+        } else {
+            return ["message" => "Category Added failed: " . mysqli_error($this->conn)];
+        }
+    }
+
+     //Module:Admin
+    //SubModule: Non Nurisng -> Add Quesiton
+    public function A_InsertNonNursingQuestion($adminId,$categoryId,$paperName,$questions)
+    {
+        //check already inserted or not
+        if(!$this->A_check_NN_paper($categoryId,$paperName))
+        {
+            $insert = "INSERT INTO non_nursing_meta (category_id, paper_name) VALUES (?, ?)";
+            $stmt = mysqli_prepare($this->conn, $insert);
+        
+            if (!$stmt) {
+                return ["message" => "Query preparation error: " . mysqli_error($this->conn)];
+            }
+        
+            mysqli_stmt_bind_param($stmt, "is", $categoryId,$paperName);
+            $result = mysqli_stmt_execute($stmt);
+        
+            if ($result) {
+                //fetch paperid from pmcq_meta
+                $paperId=$this->A_fetchPaperId_NN_meta($categoryId,$paperName);
+                //add question to pmcq_question
+                $getStatusQueandAnsTable=$this->A_addQuestion_NN($questions,$categoryId,$paperId);
+                if($getStatusQueandAnsTable=='success')
+                {                
+                    return ["message" => "Questions Added successful"];
+                }else
+                {
+                    return ["message" => "Questions Added failed: " . mysqli_error($this->conn)];
+                }
+            } else {
+                return ["message" => "Questions Added failed: " . mysqli_error($this->conn)];
+            }
+        }
+        else
+        {
+            return ["message" => "Already added"];
+        }
+       
+    }
+    public function A_addQuestion_NN($questions, $categoryId, $paperId)
+    {
+        // Check if $questions is an array
+        if (!is_array($questions)) {
+            return ["message" => "Questions should be an array"];
+        }
+        
+        foreach ($questions as $question) {
+            $questionText = $question->questionText; // Accessing object property
+            $option1 = $question->option1; // Accessing object property
+            $option2 = $question->option2; // Accessing object property
+            $option3 = $question->option3; // Accessing object property
+            $option4 = $question->option4; // Accessing object property
+            $answer = $question->answer; // Accessing object property
+            
+            // Prepare and execute the SQL query
+            $insert = "INSERT INTO non_nursing_question (category_id, paper_id, questions, option1, option2, option3, option4, answer) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $stmt = mysqli_prepare($this->conn, $insert);
+    
+            if (!$stmt) {
+                return ["message" => "Query preparation error: " . mysqli_error($this->conn)];
+            }
+    
+            mysqli_stmt_bind_param($stmt, "iissssss", $categoryId, $paperId, $questionText, $option1, $option2, $option3, $option4, $answer);
+            $result = mysqli_stmt_execute($stmt);
+    
+            if (!$result) {
+                return ["message" => "Question insertion failed: " . mysqli_error($this->conn)];
+            }
+        }
+        $this->response = "success";
+        return $this->response;
+    }
+    
+
+    public function A_fetchPaperId_NN_meta($categoryId,$paperName)
+    { 
+        $query = "SELECT sno FROM non_nursing_meta WHERE category_id=? AND paper_name=?";
+        $stmt = mysqli_prepare($this->conn, $query);
+        mysqli_stmt_bind_param($stmt, "is", $categoryId,$paperName);
+        mysqli_stmt_execute($stmt);
+        if (mysqli_stmt_errno($stmt)) {
+            return false;
+        }
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result === false) {
+            return false;
+        }
+        $count = mysqli_fetch_assoc($result)['sno'];
+        mysqli_free_result($result);
+        mysqli_stmt_close($stmt);        
+        return $count;
+
+    }
+    public function A_check_NN_paper($categoryId,$paperName)
+    {
+        $query = "SELECT COUNT(sno) AS count FROM non_nursing_meta WHERE category_id=? AND paper_name=?";
+        $stmt = mysqli_prepare($this->conn, $query);
+        mysqli_stmt_bind_param($stmt, "is", $categoryId,$paperName);
+        mysqli_stmt_execute($stmt);
+        if (mysqli_stmt_errno($stmt)) {
+            return false;
+        }
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result === false) {
+            return false;
+        }
+        $count = mysqli_fetch_assoc($result)['count'];
+        mysqli_free_result($result);
+        mysqli_stmt_close($stmt);
+        // Return 1 if the Gmail address exists, otherwise return 0        
+        return $count;
+        
+    }
     
 }
 ?> 
-
