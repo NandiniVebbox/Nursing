@@ -214,6 +214,105 @@ class Get
             return ['error' => 'No Details Found'];
         }
     }
+
+    //Module:Admin
+    //SubModule:SW ->View Subject
+    public function A_viewSubWiseSubject($adminId) 
+    {
+        $query = "SELECT * FROM subject_wise";
+        $stmt = mysqli_prepare($this->conn, $query);
+        mysqli_stmt_execute($stmt);
+
+        if (mysqli_stmt_errno($stmt)) {
+            $this->handleResponse(500, 'Internal server error');
+        }
+
+        $result = mysqli_stmt_get_result($stmt);
+        if (mysqli_num_rows($result) > 0) {
+            $subjectInfo = mysqli_fetch_all($result, MYSQLI_ASSOC);
+            mysqli_free_result($result);
+            mysqli_stmt_close($stmt);
+            return $subjectInfo;
+        } else {
+            mysqli_stmt_close($stmt);
+            return ['error' => 'No Details Found'];
+        }
+    }
+
+    //Module:Admin
+    //SubModule:SW ->View Paper
+    public function A_viewsubWisePaper($adminId, $id) 
+    {
+        $query = "SELECT * FROM subject_wise_meta WHERE subject_id=?";
+        $stmt = mysqli_prepare($this->conn, $query);
+        mysqli_stmt_bind_param($stmt, 'i', $id);
+        mysqli_stmt_execute($stmt);
+
+        if (mysqli_stmt_errno($stmt)) {
+            $this->handleResponse(500, 'Internal server error');
+        }
+
+        $result = mysqli_stmt_get_result($stmt);
+        if (mysqli_num_rows($result) > 0) {
+            $paperInfo = mysqli_fetch_all($result, MYSQLI_ASSOC);
+            mysqli_free_result($result);
+            mysqli_stmt_close($stmt);
+            return $paperInfo;
+        } else {
+            mysqli_stmt_close($stmt);
+            return ['error' => 'No Details Found'];
+        }
+    }
+
+    //Module:Admin
+    //SubModule:SW ->View Question Count
+    public function A_viewSubWiseQuestionCount($adminId, $subjectId, $paperId) 
+    {        
+        $query = "SELECT sno FROM subject_wise_question WHERE subject_id=? and paper_id=?";
+        $stmt = mysqli_prepare($this->conn, $query);
+        mysqli_stmt_bind_param($stmt, 'ii', $subjectId, $paperId);
+        mysqli_stmt_execute($stmt);
+
+        if (mysqli_stmt_errno($stmt)) {
+            $this->handleResponse(500, 'Internal server error');
+        }
+
+        $result = mysqli_stmt_get_result($stmt);
+        if (mysqli_num_rows($result) > 0) {
+            $questionCount = mysqli_fetch_all($result, MYSQLI_ASSOC);
+            mysqli_free_result($result);
+            mysqli_stmt_close($stmt);
+            return $questionCount;
+        } else {
+            mysqli_stmt_close($stmt);
+            return ['error' => 'No Details Found'];
+        }
+    }
+
+    //Module:Admin
+    //SubModule:SW ->View Question 
+    public function A_viewSubWiseQuestions($adminId, $subjectId, $paperId, $questionId) 
+    {        
+        $query = "SELECT * FROM subject_wise_question WHERE subject_id=? and paper_id=? and sno=?";
+        $stmt = mysqli_prepare($this->conn, $query);
+        mysqli_stmt_bind_param($stmt, 'iii', $subjectId, $paperId, $questionId);
+        mysqli_stmt_execute($stmt);
+
+        if (mysqli_stmt_errno($stmt)) {
+            $this->handleResponse(500, 'Internal server error');
+        }
+
+        $result = mysqli_stmt_get_result($stmt);
+        if (mysqli_num_rows($result) > 0) {
+            $paperInfo = mysqli_fetch_all($result, MYSQLI_ASSOC);
+            mysqli_free_result($result);
+            mysqli_stmt_close($stmt);
+            return $paperInfo;
+        } else {
+            mysqli_stmt_close($stmt);
+            return ['error' => 'No Details Found'];
+        }
+    }
 }
 ?>
 
